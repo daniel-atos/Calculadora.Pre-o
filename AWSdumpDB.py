@@ -1,18 +1,18 @@
+import pymysql, os, json, time
+file = "C:/Users\A738775\Documents\Calculator\data_aws.json"
+json_data=open(file).read()
+json_obj = json.loads(json_data)
+lista_sku = list(json_obj['products'])
+con = pymysql.connect(host = 'localhost',user = 'root',passwd = 'root',db = 'test')
+cursor = con.cursor()
+cursor.execute("DROP TABLE aws2")
+cursor.execute("CREATE TABLE aws2 (sku VARCHAR(255),CPU VARCHAR(255),RAM VARCHAR(255),LOC VARCHAR(255),PRECO VARCHAR(255))")
 
-import json
-import sqlite3
-
-
-with open('data_aws.json') as f:
-    data = json.loads(f.read())
-
-nodes = data['products']
-str_data = json.dumps({"nodes": nodes})
-# get data string from DB column and load into json
-db_data = json.loads(db_col_data)
-# get new/latest 'nodes' data from api as explained above
-# append this data to 'db_data' json as
-latest_data = db_data["nodes"] + new_api_nodes
-# now add this data back to column after json.dumps()
-db_col_data = json.dumps(latest_data)
-# add to DB col and DB commit
+for x in lista_sku:
+    if json_obj['products'][x]['productFamily'] == 'Compute Instance' :
+        vcpu = json_obj['products'][x]['attributes']['vcpu']
+        ram = json_obj['products'][x]['attributes']['memory']
+        loc = json_obj['products'][x]['attributes']['location']
+        cursor.execute("INSERT INTO aws2 (sku,CPU,RAM,LOC) VALUES (%s,%s,%s,%s)", (x,vcpu,ram,loc))
+con.commit()
+con.close()
